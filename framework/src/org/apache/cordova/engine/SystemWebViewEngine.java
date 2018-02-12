@@ -27,6 +27,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
@@ -113,7 +114,19 @@ public class SystemWebViewEngine implements CordovaWebViewEngine {
                 //sometimes this can be called after calling webview.destroy() on destroy()
                 //thus resulting in a NullPointerException
                 if(webView!=null) {
-                   webView.setNetworkAvailable(value); 
+                    //--Rut - 08/01/2017 - per Android minore di 4.4, L'IF SE LA WEBVIEW è DIVERSA DA NULL NON BASTA PERCHE
+                    // NELL'SDK LA CHIAMATA setNetworkAvailable referenzia un oggetto nullo
+                    // PURTROPPO NON CREDO CHE CORDOVA RISOLVERà QUESTO BUG PERCHé SI PRESENTA IN ANDROID TROPPO VECCHI
+                    // L'unica soluzione che abbiamo, è fare override del WebViewEngine di Cordova e mettere il fix -
+                    // occhio ad aggiornare se faremo update della platform
+                    // AD OGGI, 08/01/2017, IL FIX DI QUESTO CODICE è BASATO SULLA VERSIONE DI CORDOVA ANDROID 7.0.0
+//                    webView.setNetworkAvailable(value);
+                    try{
+                        webView.setNetworkAvailable(value);
+                    }
+                    catch (NullPointerException e){
+                        Log.d(TAG, "webView.setNetworkAvailable called after destroy");
+                    }
                 }
             }
             @Override
