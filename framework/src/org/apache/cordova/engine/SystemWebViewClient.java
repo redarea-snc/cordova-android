@@ -347,7 +347,7 @@ public class SystemWebViewClient extends WebViewClient {
     }
 
     private static boolean needsKitKatContentUrlFix(Uri uri) {
-        return "content".equals(uri.getScheme());
+        return android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT && "content".equals(uri.getScheme());
     }
 
     private static boolean needsSpecialsInAssetUrlFix(Uri uri) {
