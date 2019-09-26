@@ -138,7 +138,10 @@ public class CordovaInterfaceImpl implements CordovaInterface {
      */
     public boolean onActivityResult(int requestCode, int resultCode, Intent intent) {
         CordovaPlugin callback = activityResultCallback;
-        if(callback == null && initCallbackService != null) {
+        //--Rut - 26/09/2019 - vedi questa discussione https://github.com/Wizcorp/phonegap-facebook-plugin/issues/1315
+        // Fix necessario per far convivere il Facebook plugin con le callback di resume Android
+//        if(callback == null && initCallbackService != null) {
+        if(initCallbackService != null) {
             // The application was restarted, but had defined an initial callback
             // before being shut down.
             savedResult = new ActivityResultHolder(requestCode, resultCode, intent);
