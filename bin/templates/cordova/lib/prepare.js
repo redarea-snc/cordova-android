@@ -16,7 +16,6 @@
     specific language governing permissions and limitations
     under the License.
 */
-/* eslint no-useless-escape: 0 */
 
 var Q = require('q');
 var fs = require('fs');
@@ -45,9 +44,13 @@ module.exports.prepare = function (cordovaProject, options) {
 
     // Get the min SDK version from config.xml
     const minSdkVersion = this._config.getPreference('android-minSdkVersion', 'android');
+    const maxSdkVersion = this._config.getPreference('android-maxSdkVersion', 'android');
+    const targetSdkVersion = this._config.getPreference('android-targetSdkVersion', 'android');
 
     let gradlePropertiesUserConfig = {};
     if (minSdkVersion) gradlePropertiesUserConfig.cdvMinSdkVersion = minSdkVersion;
+    if (maxSdkVersion) gradlePropertiesUserConfig.cdvMaxSdkVersion = maxSdkVersion;
+    if (targetSdkVersion) gradlePropertiesUserConfig.cdvTargetSdkVersion = targetSdkVersion;
 
     let gradlePropertiesParser = new GradlePropertiesParser(this.locations.root);
     gradlePropertiesParser.configure(gradlePropertiesUserConfig);
@@ -182,11 +185,11 @@ function updateProjectAccordingTo (platformConfig, locations) {
     var strings = xmlHelpers.parseElementtreeSync(locations.strings);
 
     var name = platformConfig.name();
-    strings.find('string[@name="app_name"]').text = name.replace(/\'/g, '\\\'');
+    strings.find('string[@name="app_name"]').text = name.replace(/'/g, '\\\'');
 
     var shortName = platformConfig.shortName && platformConfig.shortName();
     if (shortName && shortName !== name) {
-        strings.find('string[@name="launcher_name"]').text = shortName.replace(/\'/g, '\\\'');
+        strings.find('string[@name="launcher_name"]').text = shortName.replace(/'/g, '\\\'');
     }
 
     fs.writeFileSync(locations.strings, strings.write({ indent: 4 }), 'utf-8');
@@ -205,9 +208,6 @@ function updateProjectAccordingTo (platformConfig, locations) {
     manifest.setVersionName(platformConfig.version())
         .setVersionCode(platformConfig.android_versionCode() || default_versionCode(platformConfig.version()))
         .setPackageId(androidPkgName)
-        .setMinSdkVersion(platformConfig.getPreference('android-minSdkVersion', 'android'))
-        .setMaxSdkVersion(platformConfig.getPreference('android-maxSdkVersion', 'android'))
-        .setTargetSdkVersion(platformConfig.getPreference('android-targetSdkVersion', 'android'))
         .write();
 
     // Java file paths shouldn't be hard coded
@@ -224,7 +224,7 @@ function updateProjectAccordingTo (platformConfig, locations) {
 
     var destFile = path.join(locations.root, 'app', 'src', 'main', 'java', androidPkgName.replace(/\./g, '/'), path.basename(java_files[0]));
     shell.mkdir('-p', path.dirname(destFile));
-    shell.sed(/package [\w\.]*;/, 'package ' + androidPkgName + ';', java_files[0]).to(destFile);
+    shell.sed(/package [\w.]*;/, 'package ' + androidPkgName + ';', java_files[0]).to(destFile);
     events.emit('verbose', 'Wrote out Android package name "' + androidPkgName + '" to ' + destFile);
 
     var removeOrigPkg = checkReqs.isWindows() || checkReqs.isDarwin() ?
