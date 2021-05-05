@@ -27,9 +27,6 @@ example
 /framework/javadoc-private
 /test/.externalNativeBuild
 
-/test/android/gradle
-/test/android/gradlew
-/test/android/gradlew.bat
 /test/androidx/gradle
 /test/androidx/gradlew
 /test/androidx/gradlew.bat
@@ -50,7 +47,6 @@ npm-debug.log
 node_modules/
 coverage/
 .nyc_output/
-package-lock.json
 # Eclipse Buildship files
 .project
 .settings

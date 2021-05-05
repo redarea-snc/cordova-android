@@ -24,7 +24,7 @@
  *  This workflow would not have the `package.json` file.
  */
 // Coho updates this line
-const VERSION = '9.0.0-dev';
+const VERSION = '10.0.0-dev';
 
 var path = require('path');
 
@@ -34,6 +34,7 @@ var PluginManager = require('cordova-common').PluginManager;
 var CordovaLogger = require('cordova-common').CordovaLogger;
 var selfEvents = require('cordova-common').events;
 var ConfigParser = require('cordova-common').ConfigParser;
+const prepare = require('./lib/prepare').prepare;
 
 var PLATFORM = 'android';
 
@@ -84,6 +85,8 @@ class Api {
             build: path.join(this.root, 'build'),
             javaSrc: path.join(appMain, 'java')
         };
+
+        this._builder = require('./lib/builders/builders').getBuilder(this.root);
     }
 
     /**
@@ -120,7 +123,7 @@ class Api {
     prepare (cordovaProject, prepareOptions) {
         cordovaProject.projectConfig = new ConfigParser(cordovaProject.locations.rootConfigXml || cordovaProject.projectConfig.path);
 
-        return require('./lib/prepare').prepare.call(this, cordovaProject, prepareOptions);
+        return prepare.call(this, cordovaProject, prepareOptions);
     }
 
     /**
@@ -160,7 +163,7 @@ class Api {
             if (plugin.getFrameworks(this.platform).length === 0) return;
             selfEvents.emit('verbose', 'Updating build files since android plugin contained <framework>');
             // This should pick the correct builder, not just get gradle
-            require('./lib/builders/builders').getBuilder().prepBuildFiles();
+            this._builder.prepBuildFiles();
         }.bind(this))
             // CB-11022 Return truthy value to prevent running prepare after
             .then(() => true);
@@ -192,7 +195,7 @@ class Api {
                 if (plugin.getFrameworks(this.platform).length === 0) return;
 
                 selfEvents.emit('verbose', 'Updating build files since android plugin contained <framework>');
-                require('./lib/builders/builders').getBuilder().prepBuildFiles();
+                this._builder.prepBuildFiles();
             }.bind(this))
             // CB-11022 Return truthy value to prevent running prepare after
             .then(() => true);

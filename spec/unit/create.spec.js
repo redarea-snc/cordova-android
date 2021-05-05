@@ -18,7 +18,7 @@
 */
 
 var rewire = require('rewire');
-var utils = require('../../bin/lib/utils');
+var utils = require('../../bin/templates/cordova/lib/utils');
 var create = rewire('../../bin/lib/create');
 var check_reqs = require('../../bin/templates/cordova/lib/check_reqs');
 var fs = require('fs-extra');
@@ -132,6 +132,7 @@ describe('create', function () {
             spyOn(create, 'copyBuildRules');
             spyOn(create, 'writeProjectProperties');
             spyOn(create, 'prepBuildFiles');
+            spyOn(create, 'writeNameForAndroidStudio');
             revert_manifest_mock = create.__set__('AndroidManifest', Manifest_mock);
             spyOn(fs, 'existsSync').and.returnValue(false);
             spyOn(fs, 'copySync');
@@ -298,6 +299,26 @@ describe('create', function () {
                     expect(create.prepBuildFiles).toHaveBeenCalledWith(project_path);
                 });
             });
+        });
+    });
+
+    describe('writeNameForAndroidStudio', () => {
+        const project_path = path.join('some', 'path');
+        const appName = 'Test Cordova';
+
+        beforeEach(function () {
+            spyOn(fs, 'ensureDirSync');
+            spyOn(fs, 'writeFileSync');
+        });
+
+        it('should call ensureDirSync with path', () => {
+            create.writeNameForAndroidStudio(project_path, appName);
+            expect(fs.ensureDirSync).toHaveBeenCalledWith(path.join(project_path, '.idea'));
+        });
+
+        it('should call writeFileSync with content', () => {
+            create.writeNameForAndroidStudio(project_path, appName);
+            expect(fs.writeFileSync).toHaveBeenCalledWith(path.join(project_path, '.idea', '.name'), appName);
         });
     });
 });
